@@ -19,13 +19,13 @@ class TwilioCreds(PropertyHolder):
     
     
 @Discoverable(DiscoverableType.block)
-class Twilio(Block):
+class TwilioSMS(Block):
     
     recipients = ListProperty(Recipient)
     creds = ObjectProperty(TwilioCreds)
     from_ = StringProperty(default='')
     
-    messages = ListProperty(str)
+    message = StringProperty(default='')
 
     def __init__(self):
         super().__init__()
@@ -41,10 +41,9 @@ class Twilio(Block):
             self._send_sms(s)
 
     def _send_sms(self, signal):
-        for msg in self.messages:
-            msg = eval_signal(signal, msg, self._logger)
-            for rcp in self.recipients:
-                self._broadcast_msg(rcp, msg)
+        message = eval_signal(signal, self.message, self._logger)
+        for rcp in self.recipients:
+            self._broadcast_msg(rcp, message)
 
     def _broadcast_msg(self, recipient, message):
         body = "%s: %s" % (recipient.name, message)
