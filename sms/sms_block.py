@@ -1,11 +1,13 @@
 from nio.util import eval_signal
 from twilio.rest import TwilioRestClient
+from twilio import TwilioRestException
 from nio.common.block.base import Block
 from nio.common.discovery import Discoverable, DiscoverableType
 from nio.metadata.properties.holder import PropertyHolder
 from nio.metadata.properties.list import ListProperty
 from nio.metadata.properties.object import ObjectProperty
 from nio.metadata.properties.string import StringProperty
+from nio.modules.threading.imports import Thread
 
 
 class Recipient(PropertyHolder):
@@ -43,20 +45,23 @@ class TwilioSMS(Block):
     def _send_sms(self, signal):
         message = eval_signal(signal, self.message, self._logger)
         for rcp in self.recipients:
-            self._broadcast_msg(rcp, message)
+            Thread(target=self._broadcast_msg, args=(rcp, message)).start()
 
-    def _broadcast_msg(self, recipient, message):
+    def _broadcast_msg(self, recipient, message, retry=False):
         body = "%s: %s" % (recipient.name, message)
         try:
+            # Twilio sends back some useless XML. Don't care.
             response = self._client.messages.create(
                 to=recipient.number,
                 from_=self.from_,
                 body=body
             )
-
-            if response is None:
-                raise Exception("Null response")
+        except TwilioRestException as e:
+            self._logger.error("Status %d" % e.status)
+            if not retry:
+                self._logger.debug("Retrying failed request...")
+                self._call(self, recipient, message_id, True)
+            raise Exception(e.msg)
         except Exception as e:
             self._logger.error("Error sending SMS to %s (%s): %s" % \
                                (recipient.name, recipient.number, e))
-            
