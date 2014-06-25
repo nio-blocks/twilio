@@ -11,7 +11,7 @@ Send text messages and make voice calls using [Twilio](https://www.twilio.com/do
 TwilioSMS
 ===========
 
-[here](https://www.twilio.com/docs/api/rest/sending-messages)
+Sends text message using [Twilio](https://www.twilio.com/docs/api/rest/sending-messages).
 
 Properties
 --------------
@@ -44,7 +44,7 @@ None
 TwilioVoice
 ===========
 
-[here](https://www.twilio.com/docs/api/rest/making-calls)
+Makes voice calls using [Twilio](https://www.twilio.com/docs/api/rest/making-calls).
 
 Properties
 --------------
