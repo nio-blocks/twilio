@@ -2,12 +2,12 @@ from dicttoxml import dicttoxml
 from twilio import twiml
 from twilio.rest import TwilioRestClient
 from twilio import TwilioRestException
-from nio.util import eval_signal
 from nio.common.block.base import Block
 from nio.common.discovery import Discoverable, DiscoverableType
 from nio.common.versioning.dependency import DependsOn
 from nio.metadata.properties.holder import PropertyHolder
 from nio.metadata.properties.list import ListProperty
+from nio.metadata.properties.expression import ExpressionProperty
 from nio.metadata.properties.object import ObjectProperty
 from nio.metadata.properties.string import StringProperty
 from nio.modules.web.imports import WebEngine
@@ -39,7 +39,7 @@ class TwilioVoice(Block):
     from_ = StringProperty(default='')
     url = StringProperty(default='')
 
-    message = StringProperty(default='An empty voice message')
+    message = ExpressionProperty(default='An empty voice message')
 
     def __init__(self):
         super().__init__()
@@ -59,7 +59,7 @@ class TwilioVoice(Block):
             self._place_calls(s)
 
     def _place_calls(self, signal):
-        msg = eval_signal(signal, self.message, self._logger)
+        msg = self.message(signal)
         msg_id = Unique.id()
         self._messages[msg_id] = msg
         for rcp in self.recipients:

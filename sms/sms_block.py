@@ -1,9 +1,9 @@
-from nio.util import eval_signal
 from twilio.rest import TwilioRestClient
 from twilio import TwilioRestException
 from nio.common.block.base import Block
 from nio.common.discovery import Discoverable, DiscoverableType
 from nio.metadata.properties.holder import PropertyHolder
+from nio.metadata.properties.expression import ExpressionProperty
 from nio.metadata.properties.list import ListProperty
 from nio.metadata.properties.object import ObjectProperty
 from nio.metadata.properties.string import StringProperty
@@ -27,7 +27,7 @@ class TwilioSMS(Block):
     creds = ObjectProperty(TwilioCreds)
     from_ = StringProperty(default='')
     
-    message = StringProperty(default='')
+    message = ExpressionProperty(default='')
 
     def __init__(self):
         super().__init__()
@@ -43,7 +43,7 @@ class TwilioSMS(Block):
             self._send_sms(s)
 
     def _send_sms(self, signal):
-        message = eval_signal(signal, self.message, self._logger)
+        message = self.message(signal)
         for rcp in self.recipients:
             Thread(target=self._broadcast_msg, args=(rcp, message)).start()
 
