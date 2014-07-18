@@ -43,9 +43,17 @@ class TwilioSMS(Block):
             self._send_sms(s)
 
     def _send_sms(self, signal):
-        message = self.message(signal)
-        for rcp in self.recipients:
-            Thread(target=self._broadcast_msg, args=(rcp, message)).start()
+        try:
+            message = self.message(signal)
+
+            for rcp in self.recipients:
+                Thread(target=self._broadcast_msg, args=(rcp, message)).start()
+
+        except Exception as e:
+            self._logger.error(
+                "Message evaluation failed: {0}: {1}".format(
+                    type(e).__name__, str(e))
+            )
 
     def _broadcast_msg(self, recipient, message, retry=False):
         body = "%s: %s" % (recipient.name, message)

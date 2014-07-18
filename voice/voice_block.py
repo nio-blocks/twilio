@@ -59,11 +59,20 @@ class TwilioVoice(Block):
             self._place_calls(s)
 
     def _place_calls(self, signal):
-        msg = self.message(signal)
-        msg_id = Unique.id()
-        self._messages[msg_id] = msg
-        for rcp in self.recipients:
-            Thread(target=self._call, args=(rcp, msg_id)).start()
+        try:
+            msg = self.message(signal)
+            msg_id = Unique.id()
+            self._messages[msg_id] = msg
+
+            for rcp in self.recipients:
+                Thread(target=self._call, args=(rcp, msg_id)).start()
+
+        except Exception as e:
+            self._logger.error(
+                "Message evaluation failed: {0}: {1}".format(
+                    type(e).__name__, str(e))
+            )
+
 
     def _call(self, recipient, message_id, retry=False):
         try:
