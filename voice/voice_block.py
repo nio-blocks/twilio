@@ -10,10 +10,10 @@ from nio.metadata.properties.list import ListProperty
 from nio.metadata.properties.expression import ExpressionProperty
 from nio.metadata.properties.object import ObjectProperty
 from nio.metadata.properties.string import StringProperty
-from nio.modules.web.imports import WebEngine
+from nio.modules.web import WebEngine
 from nio.modules.web import module_init
-from nio.modules.web.imports import RESTHandler
-from nio.modules.threading.imports import Thread
+from nio.modules.web import RESTHandler
+from nio.modules.threading import Thread
 from nio.util.unique import Unique
 from nio.util.attribute_dict import AttributeDict
 from blocks.twilio_blocks.sms.sms_block import Recipient, TwilioCreds
@@ -34,12 +34,12 @@ class Speak(RESTHandler):
 @Discoverable(DiscoverableType.block)
 class TwilioVoice(Block):
     
-    recipients = ListProperty(Recipient)
-    creds = ObjectProperty(TwilioCreds)
-    from_ = StringProperty(default='')
-    url = StringProperty(default='')
+    recipients = ListProperty(Recipient, title='Recipients')
+    creds = ObjectProperty(TwilioCreds, title='Credentials')
+    from_ = StringProperty(default='', title='From')
+    url = StringProperty(default='', title='Callback URL')
 
-    message = ExpressionProperty(default='An empty voice message')
+    message = ExpressionProperty(default='An empty voice message', title='Message')
 
     def __init__(self):
         super().__init__()

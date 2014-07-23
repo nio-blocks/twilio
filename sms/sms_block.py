@@ -7,27 +7,27 @@ from nio.metadata.properties.expression import ExpressionProperty
 from nio.metadata.properties.list import ListProperty
 from nio.metadata.properties.object import ObjectProperty
 from nio.metadata.properties.string import StringProperty
-from nio.modules.threading.imports import Thread
+from nio.modules.threading import Thread
 
 
 class Recipient(PropertyHolder):
-    name = StringProperty(default='')
-    number = StringProperty(default='5558675309')
+    name = StringProperty(title='Name', default='')
+    number = StringProperty(title='Number', default='5558675309')
 
 
 class TwilioCreds(PropertyHolder):
-    sid = StringProperty(default='')
-    token = StringProperty(default='5558675309')
+    sid = StringProperty(title='SID', default='')
+    token = StringProperty(title='Token', default='5558675309')
     
     
 @Discoverable(DiscoverableType.block)
 class TwilioSMS(Block):
     
-    recipients = ListProperty(Recipient)
-    creds = ObjectProperty(TwilioCreds)
-    from_ = StringProperty(default='')
+    recipients = ListProperty(Recipient, title='Recipients')
+    creds = ObjectProperty(TwilioCreds, title='Credentials')
+    from_ = StringProperty(title='From', default='')
     
-    message = ExpressionProperty(default='')
+    message = ExpressionProperty(title='Message', default='')
 
     def __init__(self):
         super().__init__()
