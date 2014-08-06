@@ -60,7 +60,6 @@ Dependencies
 ----------------
 
 -   [twilio](https://pypi.python.org/pypi/twilio)
--   [dicttoxml](https://pypi.python.org/pypi/dicttoxml/1.5.5)
 -   nio web module
 
 Commands

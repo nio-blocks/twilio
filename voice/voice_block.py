@@ -1,25 +1,22 @@
-from dicttoxml import dicttoxml
 from twilio import twiml
 from twilio.rest import TwilioRestClient
 from twilio import TwilioRestException
 from nio.common.block.base import Block
 from nio.common.discovery import Discoverable, DiscoverableType
 from nio.common.versioning.dependency import DependsOn
-from nio.metadata.properties.holder import PropertyHolder
 from nio.metadata.properties.list import ListProperty
 from nio.metadata.properties.expression import ExpressionProperty
 from nio.metadata.properties.object import ObjectProperty
 from nio.metadata.properties.string import StringProperty
 from nio.modules.web import WebEngine
-from nio.modules.web import module_init
 from nio.modules.web import RESTHandler
 from nio.modules.threading import Thread
 from nio.util.unique import Unique
-from nio.util.attribute_dict import AttributeDict
 from blocks.twilio_blocks.sms.sms_block import Recipient, TwilioCreds
 
 
 class Speak(RESTHandler):
+
     def __init__(self, messages):
         super().__init__('/')
         self.messages = messages
@@ -29,17 +26,20 @@ class Speak(RESTHandler):
         phrase = twiml.Response()
         phrase.say(self.messages.get(_id, ''))
         return str(phrase)
-    
+
+
 @DependsOn("nio.modules.web", "1.0.0")
 @Discoverable(DiscoverableType.block)
 class TwilioVoice(Block):
-    
+
     recipients = ListProperty(Recipient, title='Recipients')
     creds = ObjectProperty(TwilioCreds, title='Credentials')
     from_ = StringProperty(default='', title='From')
     url = StringProperty(default='', title='Callback URL')
 
-    message = ExpressionProperty(default='An empty voice message', title='Message')
+    message = ExpressionProperty(
+        default='An empty voice message',
+        title='Message')
 
     def __init__(self):
         super().__init__()
@@ -48,7 +48,7 @@ class TwilioVoice(Block):
 
     def configure(self, context):
         super().configure(context)
-        self._client = TwilioRestClient(self.creds.sid, 
+        self._client = TwilioRestClient(self.creds.sid,
                                         self.creds.token)
         self._server = WebEngine.create('helloworld', {'socket_port': 8184})
         self._server.add_handler(Speak(self._messages))
@@ -73,11 +73,10 @@ class TwilioVoice(Block):
                     type(e).__name__, str(e))
             )
 
-
     def _call(self, recipient, message_id, retry=False):
         try:
             # Twilio sends back some useless XML. Don't care.
-            response = self._client.calls.create(
+            self._client.calls.create(
                 to=recipient.number,
                 from_=self.from_,
                 url="%s?msg_id=%s" % (self.url, message_id)
@@ -90,7 +89,5 @@ class TwilioVoice(Block):
             else:
                 raise Exception(e.msg)
         except Exception as e:
-            self._logger.error("Error sending SMS to %s (%s): %s" % \
+            self._logger.error("Error sending SMS to %s (%s): %s" %
                                (recipient.name, recipient.number, e))
-
-
