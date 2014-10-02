@@ -92,10 +92,10 @@ class TwilioVoice(Block):
         except TwilioRestException as e:
             self._logger.error("Status %d" % e.status)
             if not retry:
-                self._logger.debug("Retrying failed request...")
+                self._logger.debug("Retrying failed request")
                 self._call(self, recipient, message_id, True)
             else:
-                raise Exception(e.msg)
+                self._logger.error("Retry request failed")
         except Exception as e:
             self._logger.error("Error sending SMS to %s (%s): %s" %
                                (recipient.name, recipient.number, e))

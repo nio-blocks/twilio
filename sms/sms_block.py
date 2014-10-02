@@ -1,5 +1,10 @@
 from twilio.rest import TwilioRestClient
-from twilio import TwilioRestException
+try:
+    # location moved in 3.6.7
+    from twilio.rest.exceptions import TwilioRestException
+except:
+    # keeps this for backwards compatability
+    from twilio import TwilioRestException
 from nio.common.block.base import Block
 from nio.common.discovery import Discoverable, DiscoverableType
 from nio.metadata.properties.holder import PropertyHolder
@@ -16,17 +21,17 @@ class Recipient(PropertyHolder):
 
 
 class TwilioCreds(PropertyHolder):
-    sid = StringProperty(title='SID', default='')
-    token = StringProperty(title='Token', default='5558675309')
-    
-    
+    sid = StringProperty(title='SID', default='[[TWILIO_ACCOUNT_SID]]')
+    token = StringProperty(title='Token', default='[[TWILIO_AUTH_TOKEN]]')
+
+
 @Discoverable(DiscoverableType.block)
 class TwilioSMS(Block):
-    
+
     recipients = ListProperty(Recipient, title='Recipients')
     creds = ObjectProperty(TwilioCreds, title='Credentials')
     from_ = StringProperty(title='From', default='')
-    
+
     message = ExpressionProperty(title='Message', default='')
 
     def __init__(self):
@@ -35,7 +40,7 @@ class TwilioSMS(Block):
 
     def configure(self, context):
         super().configure(context)
-        self._client = TwilioRestClient(self.creds.sid, 
+        self._client = TwilioRestClient(self.creds.sid,
                                         self.creds.token)
 
     def process_signals(self, signals):
@@ -67,9 +72,10 @@ class TwilioSMS(Block):
         except TwilioRestException as e:
             self._logger.error("Status %d" % e.status)
             if not retry:
-                self._logger.debug("Retrying failed request...")
-                self._call(self, recipient, message_id, True)
-            raise Exception(e.msg)
+                self._logger.debug("Retrying failed request")
+                self._broadcast_msg(recipient, message, True)
+            else:
+                self._logger.error("Retry request failed")
         except Exception as e:
             self._logger.error("Error sending SMS to %s (%s): %s" % \
                                (recipient.name, recipient.number, e))
