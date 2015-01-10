@@ -1,6 +1,11 @@
 from twilio import twiml
 from twilio.rest import TwilioRestClient
-from twilio import TwilioRestException
+try:
+    # location moved in 3.6.7
+    from twilio.rest.exceptions import TwilioRestException
+except:
+    # keeps this for backwards compatability
+    from twilio import TwilioRestException
 from nio.common.block.base import Block
 from nio.common.discovery import Discoverable, DiscoverableType
 from nio.common.versioning.dependency import DependsOn
