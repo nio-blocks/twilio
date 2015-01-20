@@ -45,6 +45,7 @@ class TwilioVoice(Block):
     message = ExpressionProperty(
         default='An empty voice message',
         title='Message')
+    listen_port = IntProperty(title="Listen Port", default=8184)
 
     def __init__(self):
         super().__init__()
@@ -56,7 +57,7 @@ class TwilioVoice(Block):
         super().configure(context)
         self._client = TwilioRestClient(self.creds.sid,
                                         self.creds.token)
-        self._server = WebEngine.get(8184)
+        self._server = WebEngine.get(self.listen_port)
         self._server.add_handler(Speak(self._messages))
 
     def start(self):
