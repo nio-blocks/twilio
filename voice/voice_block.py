@@ -34,7 +34,7 @@ class TwilioVoice(Block):
 
     recipients = ListProperty(Recipient, title='Recipients')
     creds = ObjectProperty(TwilioCreds, title='Credentials')
-    from_ = StringProperty(default='', title='From')
+    from_ = StringProperty(default='[[TWILIO_NUMBER]]', title='From')
     url = StringProperty(default='', title='Callback URL')
 
     message = ExpressionProperty(
