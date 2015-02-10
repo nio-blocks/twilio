@@ -30,7 +30,7 @@ class TwilioSMS(Block):
 
     recipients = ListProperty(Recipient, title='Recipients')
     creds = ObjectProperty(TwilioCreds, title='Credentials')
-    from_ = StringProperty(title='From', default='')
+    from_ = StringProperty(title='From', default='[[TWILIO_NUMBER]]')
 
     message = ExpressionProperty(title='Message', default='')
 
