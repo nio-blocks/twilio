@@ -1,3 +1,4 @@
+from .mixins.web_server.web_server_block import WebServer
 from twilio import twiml
 from twilio.rest import TwilioRestClient
 try:
@@ -6,36 +7,41 @@ try:
 except:
     # keeps this for backwards compatability
     from twilio import TwilioRestException
+from nio.common.signal.base import Signal
 from nio.common.block.base import Block
 from nio.common.discovery import Discoverable, DiscoverableType
 from nio.common.versioning.dependency import DependsOn
-from nio.metadata.properties.list import ListProperty
-from nio.metadata.properties.expression import ExpressionProperty
-from nio.metadata.properties.object import ObjectProperty
-from nio.metadata.properties.string import StringProperty
+from nio.metadata.properties import ExpressionProperty, IntProperty, \
+    ListProperty, ObjectProperty, StringProperty
 from nio.modules.web import WebEngine
 from nio.modules.web import RESTHandler
 from nio.modules.threading import Thread
 from nio.util.unique import Unique
-from blocks.twilio_blocks.sms.sms_block import Recipient, TwilioCreds
+from ..sms.sms_block import Recipient, TwilioCreds
 
 
 class Speak(RESTHandler):
 
-    def __init__(self, messages):
-        super().__init__('/')
+    def __init__(self, endpoint, notifier, logger, messages):
+        super().__init__('/'+endpoint)
+        self.notify = notifier
+        self._logger = logger
         self.messages = messages
 
-    def on_post(self, identifier, body, params):
-        _id = params.get('msg_id')
+    def on_post(self, req, rsp):
+        self._logger.debug('Speak is handling POST: {}, {}'.format(req, rsp))
+        params = req.get_params()
+        _id = params.get('msg_id', '')
+        self._logger.debug('POST params: {}'.format(params))
         phrase = twiml.Response()
         phrase.say(self.messages.get(_id, ''))
-        return str(phrase)
+        rsp.set_body(phrase)
+        self.notify([Signal(params)])
 
 
 @DependsOn("nio.modules.web", "1.0.0")
 @Discoverable(DiscoverableType.block)
-class TwilioVoice(Block):
+class TwilioVoice(Block, WebServer):
 
     recipients = ListProperty(Recipient, title='Recipients')
     creds = ObjectProperty(TwilioCreds, title='Credentials')
@@ -46,6 +52,9 @@ class TwilioVoice(Block):
         default='An empty voice message',
         title='Message')
     listen_port = IntProperty(title="Listen Port", default=8184)
+    port = IntProperty(title='Port', default=8184)
+    host = StringProperty(title='Host', default='[[NIOHOST]]')
+    endpoint = StringProperty(title='Endpoint', default='')
 
     def __init__(self):
         super().__init__()
@@ -57,16 +66,26 @@ class TwilioVoice(Block):
         super().configure(context)
         self._client = TwilioRestClient(self.creds.sid,
                                         self.creds.token)
-        self._server = WebEngine.get(self.listen_port)
-        self._server.add_handler(Speak(self._messages))
+        conf = {
+            'host': self.host,
+            'port': self.port
+        }
+        self.configure_server(conf,
+                              Speak(self.endpoint,
+                                    self.notify_signals,
+                                    self._logger,
+                                    self._messages),
+                              )
 
     def start(self):
         super().start()
-        self._server.start()
+        # Start Web Server
+        self.start_server()
 
     def stop(self):
-        self._server.stop()
         super().stop()
+        # Stop Web Server
+        self.stop_server()
 
     def process_signals(self, signals):
         for s in signals:
@@ -77,10 +96,8 @@ class TwilioVoice(Block):
             msg = self.message(signal)
             msg_id = Unique.id()
             self._messages[msg_id] = msg
-
             for rcp in self.recipients:
                 Thread(target=self._call, args=(rcp, msg_id)).start()
-
         except Exception as e:
             self._logger.error(
                 "Message evaluation failed: {0}: {1}".format(
@@ -90,16 +107,21 @@ class TwilioVoice(Block):
     def _call(self, recipient, message_id, retry=False):
         try:
             # Twilio sends back some useless XML. Don't care.
+            to = recipient.number,
+            from_ = self.from_,
+            url = "%s?msg_id=%s" % (self.url, message_id)
+            self._logger.debug("Making call to {}, from {}, with callback url"
+                               " {}".format(to, from_ , url))
             self._client.calls.create(
-                to=recipient.number,
-                from_=self.from_,
-                url="%s?msg_id=%s" % (self.url, message_id)
+                to=to,
+                from_=from_,
+                url=url
             )
         except TwilioRestException as e:
             self._logger.error("Status %d" % e.status)
             if not retry:
                 self._logger.debug("Retrying failed request")
-                self._call(self, recipient, message_id, True)
+                self._call(recipient, message_id, True)
             else:
                 self._logger.error("Retry request failed")
         except Exception as e:
