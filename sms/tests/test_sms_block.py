@@ -42,9 +42,10 @@ class TestQueue(NIOBlockTestCase):
         blk.start()
         blk.process_signals(signals)
         sleep(1)
-        blk._client.messages.create.assert_called_once_with(to='5558675309',
-                                                            from_='',
-                                                            body='Snoopy: hi')
+        blk._client.messages.create.assert_called_once_with(
+            to='5558675309',
+            from_='[[TWILIO_NUMBER]]',
+            body='Snoopy: hi')
         self.assertEqual(1, blk._client.messages.create.call_count)
         blk.stop()
 
