@@ -51,7 +51,6 @@ class TwilioVoice(Block, WebServer):
     message = ExpressionProperty(
         default='An empty voice message',
         title='Message')
-    listen_port = IntProperty(title="Listen Port", default=8184)
     port = IntProperty(title='Port', default=8184)
     host = StringProperty(title='Host', default='[[NIOHOST]]')
     endpoint = StringProperty(title='Endpoint', default='')
