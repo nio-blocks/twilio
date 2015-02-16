@@ -48,8 +48,34 @@ class TestVoice(NIOBlockTestCase):
             status=400,
             uri='bad'
         )
+        blk._logger.debug = MagicMock()
+        blk._logger.error = MagicMock()
         blk.start()
         blk.process_signals(signals)
         e.wait(1)
         self.assertEqual(2, blk._client.calls.create.call_count)
+        blk._logger.debug.mock_calls[1].assert_called_with(
+            'Retrying failed request'
+        )
+        blk._logger.error.assert_called_with('Retry request failed')
+        blk.stop()
+
+    def test_voice_call_error(self):
+        e = Event()
+        signals = [Signal()]
+        rcp_name = 'Snoopy'
+        rcp_number = '5558675309'
+        error_msg = 'uh oh'
+        cfg = { 'recipients': [{'name': rcp_name, 'number': rcp_number}] }
+        blk = self._create_server(cfg, e)
+        blk._client.calls.create.side_effect = Exception(error_msg)
+        blk._logger.error = MagicMock()
+        blk.start()
+        blk.process_signals(signals)
+        e.wait(1)
+        self.assertEqual(1, blk._client.calls.create.call_count)
+        blk._logger.error.assert_called_with(
+            'Error sending voice name: {}, number: {}: {}'.format(
+                rcp_name, rcp_number, error_msg)
+        )
         blk.stop()

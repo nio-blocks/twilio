@@ -19,6 +19,9 @@ class Recipient(PropertyHolder):
     name = StringProperty(title='Name', default='')
     number = StringProperty(title='Number', default='5558675309')
 
+    def __str__(self):
+        return 'name: {}, number: {}'.format(self.name, self.number)
+
 
 class TwilioCreds(PropertyHolder):
     sid = StringProperty(title='SID', default='[[TWILIO_ACCOUNT_SID]]')

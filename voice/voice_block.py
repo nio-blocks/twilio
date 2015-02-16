@@ -15,18 +15,18 @@ from nio.metadata.properties import ExpressionProperty, IntProperty, \
     ListProperty, ObjectProperty, StringProperty
 from nio.modules.web import WebEngine
 from nio.modules.web import RESTHandler
-from nio.modules.threading import Thread
+from nio.modules.threading import spawn
 from nio.util.unique import Unique
 from ..sms.sms_block import Recipient, TwilioCreds
 
 
 class Speak(RESTHandler):
 
-    def __init__(self, endpoint, notifier, logger, messages):
+    def __init__(self, endpoint, blk):
         super().__init__('/'+endpoint)
-        self.notify = notifier
-        self._logger = logger
-        self.messages = messages
+        self.notify = blk.notify_signals
+        self._logger = blk._logger
+        self.messages = blk._messages
 
     def on_post(self, req, rsp):
         self._logger.debug('Speak is handling POST: {}, {}'.format(req, rsp))
@@ -69,12 +69,7 @@ class TwilioVoice(Block, WebServer):
             'host': self.host,
             'port': self.port
         }
-        self.configure_server(conf,
-                              Speak(self.endpoint,
-                                    self.notify_signals,
-                                    self._logger,
-                                    self._messages),
-                              )
+        self.configure_server(conf, Speak(self.endpoint, self))
 
     def start(self):
         super().start()
@@ -96,7 +91,7 @@ class TwilioVoice(Block, WebServer):
             msg_id = Unique.id()
             self._messages[msg_id] = msg
             for rcp in self.recipients:
-                Thread(target=self._call, args=(rcp, msg_id)).start()
+                spawn(target=self._call, recipient=rcp, message_id=msg_id)
         except Exception as e:
             self._logger.error(
                 "Message evaluation failed: {0}: {1}".format(
@@ -124,5 +119,6 @@ class TwilioVoice(Block, WebServer):
             else:
                 self._logger.error("Retry request failed")
         except Exception as e:
-            self._logger.error("Error sending SMS to %s (%s): %s" %
-                               (recipient.name, recipient.number, e))
+            self._logger.error("Error sending voice {}: {}".format(
+                recipient, e
+            ))
