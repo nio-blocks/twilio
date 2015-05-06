@@ -1,9 +1,8 @@
-from unittest.mock import patch, MagicMock
-from ..voice_block import TwilioVoice, TwilioRestException
+from unittest.mock import MagicMock
+from ..voice.voice_block import TwilioVoice, TwilioRestException
 from nio.util.support.block_test_case import NIOBlockTestCase
 from nio.common.signal.base import Signal
 from nio.modules.threading import Event
-from time import sleep
 
 
 class AVoiceBlock(TwilioVoice):
@@ -31,7 +30,7 @@ class TestVoice(NIOBlockTestCase):
     def test_voice(self):
         e = Event()
         signals = [Signal()]
-        cfg = { 'recipients': [ {'name': 'Snoopy', 'number': '5558675309'} ] }
+        cfg = {'recipients': [{'name': 'Snoopy', 'number': '5558675309'}]}
         blk = self._create_server(cfg, e)
         blk.start()
         blk.process_signals(signals)
@@ -42,7 +41,7 @@ class TestVoice(NIOBlockTestCase):
     def test_voice_retry(self):
         e = Event()
         signals = [Signal()]
-        cfg = { 'recipients': [ {'name': 'Snoopy', 'number': '5558675309'} ] }
+        cfg = {'recipients': [{'name': 'Snoopy', 'number': '5558675309'}]}
         blk = self._create_server(cfg, e)
         blk._client.calls.create.side_effect = TwilioRestException(
             status=400,
@@ -66,7 +65,7 @@ class TestVoice(NIOBlockTestCase):
         rcp_name = 'Snoopy'
         rcp_number = '5558675309'
         error_msg = 'uh oh'
-        cfg = { 'recipients': [{'name': rcp_name, 'number': rcp_number}] }
+        cfg = {'recipients': [{'name': rcp_name, 'number': rcp_number}]}
         blk = self._create_server(cfg, e)
         blk._client.calls.create.side_effect = Exception(error_msg)
         blk._logger.error = MagicMock()

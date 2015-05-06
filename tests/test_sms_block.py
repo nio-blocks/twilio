@@ -1,5 +1,5 @@
-from unittest.mock import patch, MagicMock
-from ..sms_block import TwilioSMS, TwilioRestException
+from unittest.mock import MagicMock
+from ..sms.sms_block import TwilioSMS, TwilioRestException
 from nio.util.support.block_test_case import NIOBlockTestCase
 from nio.common.signal.base import Signal
 from nio.modules.threading import Event
