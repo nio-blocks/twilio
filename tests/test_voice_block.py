@@ -1,8 +1,8 @@
 from unittest.mock import MagicMock
 from ..voice.voice_block import TwilioVoice, TwilioRestException
-from nio.util.support.block_test_case import NIOBlockTestCase
-from nio.common.signal.base import Signal
-from nio.modules.threading import Event
+from nio.testing.block_test_case import NIOBlockTestCase
+from nio import Signal
+from threading import Event
 
 
 class AVoiceBlock(TwilioVoice):
@@ -47,16 +47,16 @@ class TestVoice(NIOBlockTestCase):
             status=400,
             uri='bad'
         )
-        blk._logger.debug = MagicMock()
-        blk._logger.error = MagicMock()
+        blk.logger.debug = MagicMock()
+        blk.logger.error = MagicMock()
         blk.start()
         blk.process_signals(signals)
         e.wait(1)
         self.assertEqual(2, blk._client.calls.create.call_count)
-        blk._logger.debug.mock_calls[1].assert_called_with(
+        blk.logger.debug.mock_calls[1].assert_called_with(
             'Retrying failed request'
         )
-        blk._logger.error.assert_called_with('Retry request failed')
+        blk.logger.error.assert_called_with('Retry request failed')
         blk.stop()
 
     def test_voice_call_error(self):
@@ -68,12 +68,12 @@ class TestVoice(NIOBlockTestCase):
         cfg = {'recipients': [{'name': rcp_name, 'number': rcp_number}]}
         blk = self._create_server(cfg, e)
         blk._client.calls.create.side_effect = Exception(error_msg)
-        blk._logger.error = MagicMock()
+        blk.logger.error = MagicMock()
         blk.start()
         blk.process_signals(signals)
         e.wait(1)
         self.assertEqual(1, blk._client.calls.create.call_count)
-        blk._logger.error.assert_called_with(
+        blk.logger.error.assert_called_with(
             'Error sending voice name: {}, number: {}: {}'.format(
                 rcp_name, rcp_number, error_msg)
         )

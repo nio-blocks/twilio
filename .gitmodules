@@ -1,3 +1,0 @@
-[submodule "voice/mixins"]
-	path = voice/mixins
-	url = git@github.com:nio-blocks/mixins
