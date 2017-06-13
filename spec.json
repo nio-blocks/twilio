@@ -1,28 +1,28 @@
 {
-  "nio/TwilioVoice": {
-    "Version": "1.0.0",
-    "Dependencies": [
-      "-   [twilio](https://pypi.python.org/pypi/twilio)",
-      "-   nio web module"
-    ],
-    "Output": "None",
-    "Input": "Any list of signals. A phone call is made for each one.",
-    "Category": "WebService",
-    "Properties": {
-      "recipients": {
-        "description": "List of recipients to call. Name and number."
-      },
-      "creds": {
-        "description": "API credentials."
-      },
-      "from": {
-        "description": "Twilio number to make the voice call from."
-      },
-      "url": {
-        "description": "Twilio makes a POST request to this URL to get the TwiML for the phone call."
-      }
-    },
-    "Description": "Makes voice calls using [Twilio](https://www.twilio.com/docs/api/rest/making-calls).",
-    "Commands": {}
-  }
+    "nio/TwilioVoice": {
+        "Input": {
+            "Description": "Any list of signals. A phone call is made for each one."
+        },
+        "Properties": {
+            "recipients": {
+                "description": "List of recipients to call. Name and number."
+            },
+            "url": {
+                "description": "Twilio makes a POST request to this URL to get the TwiML for the phone call."
+            },
+            "creds": {
+                "description": "API credentials."
+            },
+            "from": {
+                "description": "Twilio number to make the voice call from."
+            }
+        },
+        "Commands": {},
+        "Output": {
+            "Description": "None"
+        },
+        "Description": "Makes voice calls using [Twilio](https://www.twilio.com/docs/api/rest/making-calls).",
+        "Category": "WebService",
+        "Version": "1.0.0"
+    }
 }
