@@ -3,5 +3,10 @@
     "Reference": "github.com/nio-blocks/twilio.git@v1.0.0",
     "Version": "1.0.0",
     "Language": "Python"
+  },
+  "nio/TwilioSMS": {
+    "Reference": "github.com/nio-blocks/twilio.git@v1.0.0",
+    "Version": "1.0.0",
+    "Language": "Python"
   }
 }

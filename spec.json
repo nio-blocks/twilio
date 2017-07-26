@@ -24,5 +24,8 @@
         "Description": "Makes voice calls using [Twilio](https://www.twilio.com/docs/api/rest/making-calls).",
         "Category": "WebService",
         "Version": "1.0.0"
+    },
+    "nio/TwilioSMS": {
+        "Description": "Send text message."
     }
 }
