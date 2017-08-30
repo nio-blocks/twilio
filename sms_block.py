@@ -1,18 +1,15 @@
 from twilio.rest import TwilioRestClient
+from threading import Thread
 try:
     # location moved in 3.6.7
     from twilio.rest.exceptions import TwilioRestException
 except:
     # keeps this for backwards compatability
     from twilio import TwilioRestException
-from nio.block.base import Block
-from nio.util.discovery import discoverable
-from nio.properties.holder import PropertyHolder
-from nio.properties import Property
-from nio.properties.list import ListProperty
-from nio.properties.object import ObjectProperty
-from nio.properties.string import StringProperty
-from threading import Thread
+
+from nio import TerminatorBlock
+from nio.properties import (PropertyHolder, Property, ListProperty,
+                            ObjectProperty, StringProperty, VersionProperty)
 
 
 class Recipient(PropertyHolder):
@@ -28,14 +25,13 @@ class TwilioCreds(PropertyHolder):
     token = StringProperty(title='Token', default='[[TWILIO_AUTH_TOKEN]]')
 
 
-@discoverable
-class TwilioSMS(Block):
+class TwilioSMS(TerminatorBlock):
 
     recipients = ListProperty(Recipient, title='Recipients')
     creds = ObjectProperty(TwilioCreds, title='Credentials')
     from_ = StringProperty(title='From', default='[[TWILIO_NUMBER]]')
-
     message = Property(title='Message', default='')
+    version = VersionProperty('1.0.0')
 
     def __init__(self):
         super().__init__()
@@ -80,5 +76,5 @@ class TwilioSMS(Block):
             else:
                 self.logger.error("Retry request failed")
         except Exception as e:
-            self.logger.error("Error sending SMS to %s (%s): %s" % \
-                               (recipient.name(), recipient.number(), e))
+            self.logger.error("Error sending SMS to %s (%s): %s" %
+                              (recipient.name(), recipient.number(), e))

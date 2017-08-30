@@ -1,12 +1,12 @@
 {
   "nio/TwilioSMS": {
     "language": "Python",
-    "version": "0.0.1",
-    "url": "git://github.com/nio-blocks/twilio.git"
+    "url": "git://github.com/nio-blocks/twilio.git",
+    "version": "1.0.0"
   },
   "nio/TwilioVoice": {
     "language": "Python",
-    "version": "0.0.1",
-    "url": "git://github.com/nio-blocks/twilio.git"
+    "url": "git://github.com/nio-blocks/twilio.git",
+    "version": "1.0.0"
   }
 }

@@ -1,18 +1,106 @@
 {
   "nio/TwilioSMS": {
-    "version": "0.0.1",
-    "description": "",
-    "inputs": {},
+    "version": "1.0.0",
+    "description": "Sends text message using [Twilio](https://www.twilio.com/docs/api/rest/sending-messages).",
+    "properties": {
+      "creds": {
+        "title": "Credentials",
+        "type": "ObjectType",
+        "description": "API credentials.",
+        "default": {
+          "sid": "[[TWILIO_ACCOUNT_SID]]",
+          "token": "[[TWILIO_AUTH_TOKEN]]"
+        }
+      },
+      "from_": {
+        "title": "From",
+        "type": "StringType",
+        "description": "Twilio number to send the message from.",
+        "default": "[[TWILIO_NUMBER]]"
+      },
+      "message": {
+        "title": "Message",
+        "type": "Type",
+        "description": "Text message to send.",
+        "default": ""
+      },
+      "recipients": {
+        "title": "Recipients",
+        "type": "ListType",
+        "description": "List of recipients to send text message to. Name and number.",
+        "default": []
+      }
+    },
+    "inputs": {
+      "default": {
+        "description": "Any list of signals. A text message is sent for each one."
+      }
+    },
     "outputs": {},
-    "properties": {},
     "commands": {}
   },
   "nio/TwilioVoice": {
-    "version": "0.0.1",
-    "description": "",
-    "inputs": {},
+    "version": "1.0.0",
+    "description": "Makes voice calls using [Twilio](https://www.twilio.com/docs/api/rest/making-calls).",
+    "properties": {
+      "creds": {
+        "title": "Credentials",
+        "type": "ObjectType",
+        "description": "API credentials.",
+        "default": {
+          "sid": "[[TWILIO_ACCOUNT_SID]]",
+          "token": "[[TWILIO_AUTH_TOKEN]]"
+        }
+      },
+      "endpoint": {
+        "title": "Endpoint",
+        "type": "StringType",
+        "description": "Endpoint to configure voice server on.",
+        "default": ""
+      },
+      "from_": {
+        "title": "From",
+        "type": "StringType",
+        "description": "Twilio number to make the voice call from.",
+        "default": "[[TWILIO_NUMBER]]"
+      },
+      "host": {
+        "title": "Host",
+        "type": "StringType",
+        "description": "Host address to configure voice server on.",
+        "default": "[[NIOHOST]]"
+      },
+      "message": {
+        "title": "Message",
+        "type": "Type",
+        "description": "Configurable voice message.",
+        "default": "An empty voice message"
+      },
+      "port": {
+        "title": "Port",
+        "type": "IntType",
+        "description": "Port to configure voice server on.",
+        "default": 8184
+      },
+      "recipients": {
+        "title": "Recipients",
+        "type": "ListType",
+        "description": "List of recipients to call. Name and number.",
+        "default": []
+      },
+      "url": {
+        "title": "Callback URL",
+        "type": "StringType",
+        "description": "Twilio makes a POST request to this URL to get the TwiML for the phone call.",
+        "default": ""
+      }
+    },
+    "inputs": {
+      "default": {
+        "description": "Any list of signals. A phone call is made for each one."
+      }
+    },
     "outputs": {},
-    "properties": {},
     "commands": {}
   }
 }
