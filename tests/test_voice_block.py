@@ -1,10 +1,14 @@
 from unittest.mock import MagicMock
-from ..voice.voice_block import TwilioVoice, TwilioRestException
-from nio.testing.block_test_case import NIOBlockTestCase
-from nio import Signal
 from threading import Event
 
+from nio.testing.block_test_case import NIOBlockTestCase
+from nio.util.discovery import not_discoverable
+from nio import Signal
 
+from ..voice_block import TwilioVoice, TwilioRestException
+
+
+@not_discoverable
 class AVoiceBlock(TwilioVoice):
 
     def __init__(self, e):

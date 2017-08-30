@@ -1,9 +1,11 @@
 from unittest.mock import MagicMock
-from ..sms.sms_block import TwilioSMS, TwilioRestException
-from nio.testing.block_test_case import NIOBlockTestCase
-from nio.signal.base import Signal
 from threading import Event
 from time import sleep
+
+from nio.testing.block_test_case import NIOBlockTestCase
+from nio.signal.base import Signal
+
+from ..sms_block import TwilioSMS, TwilioRestException
 
 
 class EventSignal(Signal):
@@ -92,7 +94,8 @@ class TestQueue(NIOBlockTestCase):
         self.assertEqual(1, blk._client.messages.create.call_count)
         self.assertEqual(1, blk.logger.error.call_count)
         blk.logger.error.assert_called_once_with(
-            "Error sending SMS to Snoopy (5558675309): could not create message"
+            "Error sending SMS to Snoopy (5558675309): could not create "
+            "message"
         )
         blk.stop()
 

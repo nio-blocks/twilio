@@ -1,22 +1,22 @@
 from twilio import twiml
 from twilio.rest import TwilioRestClient
+from uuid import uuid4
 try:
     # location moved in 3.6.7
     from twilio.rest.exceptions import TwilioRestException
 except:
     # keeps this for backwards compatability
     from twilio import TwilioRestException
+
 from nio.signal.base import Signal
-from nio.block.base import Block
-from nio.util.discovery import discoverable
+from nio import TerminatorBlock
 from nio.util.versioning.dependency import DependsOn
 from nio.properties import Property, IntProperty, \
-    ListProperty, ObjectProperty, StringProperty
-from nio.modules.web import WebEngine
+    ListProperty, ObjectProperty, StringProperty, VersionProperty
 from nio.modules.web import RESTHandler
 from nio.util.threading.spawn import spawn
-from uuid import uuid4
-from ..sms.sms_block import Recipient, TwilioCreds
+
+from .sms_block import Recipient, TwilioCreds
 
 
 class Speak(RESTHandler):
@@ -39,20 +39,19 @@ class Speak(RESTHandler):
 
 
 @DependsOn("nio.modules.web", "1.0.0")
-@discoverable
-class TwilioVoice(Block):
+class TwilioVoice(TerminatorBlock):
 
     recipients = ListProperty(Recipient, title='Recipients')
     creds = ObjectProperty(TwilioCreds, title='Credentials')
     from_ = StringProperty(default='[[TWILIO_NUMBER]]', title='From')
     url = StringProperty(default='', title='Callback URL')
-
     message = Property(
         default='An empty voice message',
         title='Message')
     port = IntProperty(title='Port', default=8184)
     host = StringProperty(title='Host', default='[[NIOHOST]]')
     endpoint = StringProperty(title='Endpoint', default='')
+    version = VersionProperty('1.0.0')
 
     def __init__(self):
         super().__init__()
@@ -104,7 +103,7 @@ class TwilioVoice(Block):
             from_ = self.from_(),
             url = "%s?msg_id=%s" % (self.url(), message_id)
             self.logger.debug("Making call to {}, from {}, with callback url"
-                               " {}".format(to, from_ , url))
+                              " {}".format(to, from_, url))
             self._client.calls.create(
                 to=to,
                 from_=from_,
