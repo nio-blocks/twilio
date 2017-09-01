@@ -51,7 +51,7 @@ class TwilioVoice(TerminatorBlock):
     port = IntProperty(title='Port', default=8184)
     host = StringProperty(title='Host', default='[[NIOHOST]]')
     endpoint = StringProperty(title='Endpoint', default='')
-    version = VersionProperty('1.0.0')
+    version = VersionProperty("1.0.0")
 
     def __init__(self):
         super().__init__()
