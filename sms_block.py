@@ -31,7 +31,7 @@ class TwilioSMS(TerminatorBlock):
     creds = ObjectProperty(TwilioCreds, title='Credentials')
     from_ = StringProperty(title='From', default='[[TWILIO_NUMBER]]')
     message = Property(title='Message', default='')
-    version = VersionProperty('1.0.0')
+    version = VersionProperty("1.0.0")
 
     def __init__(self):
         super().__init__()
