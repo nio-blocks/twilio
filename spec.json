@@ -2,6 +2,9 @@
   "nio/TwilioSMS": {
     "version": "1.0.0",
     "description": "Sends text message using [Twilio](https://www.twilio.com/docs/api/rest/sending-messages).",
+    "categories": [
+      "Notifications"
+    ],
     "properties": {
       "creds": {
         "title": "Credentials",
@@ -42,6 +45,9 @@
   "nio/TwilioVoice": {
     "version": "1.0.0",
     "description": "Makes voice calls using [Twilio](https://www.twilio.com/docs/api/rest/making-calls).",
+    "categories": [
+      "Notifications"
+    ],
     "properties": {
       "creds": {
         "title": "Credentials",
