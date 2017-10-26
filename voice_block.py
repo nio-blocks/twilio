@@ -41,7 +41,7 @@ class Speak(RESTHandler):
 @DependsOn("nio.modules.web", "1.0.0")
 class TwilioVoice(TerminatorBlock):
 
-    recipients = ListProperty(Recipient, title='Recipients')
+    recipients = ListProperty(Recipient, title='Recipients', default=[])
     creds = ObjectProperty(TwilioCreds, title='Credentials')
     from_ = StringProperty(default='[[TWILIO_NUMBER]]', title='From')
     url = StringProperty(default='', title='Callback URL')
