@@ -27,7 +27,7 @@ class TwilioCreds(PropertyHolder):
 
 class TwilioSMS(TerminatorBlock):
 
-    recipients = ListProperty(Recipient, title='Recipients')
+    recipients = ListProperty(Recipient, title='Recipients', default=[])
     creds = ObjectProperty(TwilioCreds, title='Credentials')
     from_ = StringProperty(title='From', default='[[TWILIO_NUMBER]]')
     message = Property(title='Message', default='')
