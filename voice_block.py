@@ -65,6 +65,7 @@ class TwilioVoice(Block):
         self.logger.debug('Configuring web server on {}:{}'.format(
             self.host(), self.port()))
         config = {}
+        # Incoming requests from Twilio will not have Auth header
         Speak.before_handler = self._no_auth
         self._server = WebEngine.add_server(self.port(), self.host(), config)
         self._server.add_handler(Speak(self.endpoint(), self))
