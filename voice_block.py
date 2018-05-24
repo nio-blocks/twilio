@@ -47,7 +47,7 @@ class TwilioVoice(Block):
         default='An empty voice message',
         title='Message')
     port = IntProperty(title='Port', default=8184)
-    host = StringProperty(title='Host', default='0.0.0.0')
+    host = StringProperty(title='Host', default='[[NIOHOST]]')
     endpoint = StringProperty(title='Endpoint', default='')
     version = VersionProperty("1.0.0")
 
