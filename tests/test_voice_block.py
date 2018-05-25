@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from threading import Event
 
 from nio.testing.block_test_case import NIOBlockTestCase
@@ -24,14 +24,12 @@ class TestVoice(NIOBlockTestCase):
 
     def _create_server(self, cfg, e):
         blk = AVoiceBlock(e)
-        blk.configure_server = MagicMock()
-        blk.start_server = MagicMock()
-        blk.stop_server = MagicMock()
         self.configure_block(blk, cfg)
         blk._client.calls.create = MagicMock()
         return blk
 
-    def test_voice(self):
+    @patch(TwilioVoice.__module__ + '.WebEngine')
+    def test_voice(self, mock_WebEngine):
         e = Event()
         signals = [Signal()]
         cfg = {'recipients': [{'name': 'Snoopy', 'number': '5558675309'}]}
@@ -42,7 +40,8 @@ class TestVoice(NIOBlockTestCase):
         self.assertEqual(1, blk._client.calls.create.call_count)
         blk.stop()
 
-    def test_voice_retry(self):
+    @patch(TwilioVoice.__module__ + '.WebEngine')
+    def test_voice_retry(self, mock_WebEngine):
         e = Event()
         signals = [Signal()]
         cfg = {'recipients': [{'name': 'Snoopy', 'number': '5558675309'}]}
@@ -63,7 +62,8 @@ class TestVoice(NIOBlockTestCase):
         blk.logger.error.assert_called_with('Retry request failed')
         blk.stop()
 
-    def test_voice_call_error(self):
+    @patch(TwilioVoice.__module__ + '.WebEngine')
+    def test_voice_call_error(self, mock_WebEngine):
         e = Event()
         signals = [Signal()]
         rcp_name = 'Snoopy'

@@ -8,12 +8,11 @@ except:
     # keeps this for backwards compatability
     from twilio import TwilioRestException
 
-from nio.signal.base import Signal
-from nio import TerminatorBlock
+from nio import Block, Signal
 from nio.util.versioning.dependency import DependsOn
 from nio.properties import Property, IntProperty, \
     ListProperty, ObjectProperty, StringProperty, VersionProperty
-from nio.modules.web import RESTHandler
+from nio.modules.web import RESTHandler, WebEngine
 from nio.util.threading.spawn import spawn
 
 from .sms_block import Recipient, TwilioCreds
@@ -38,8 +37,7 @@ class Speak(RESTHandler):
         self.notify([Signal(params)])
 
 
-@DependsOn("nio.modules.web", "1.0.0")
-class TwilioVoice(TerminatorBlock):
+class TwilioVoice(Block):
 
     recipients = ListProperty(Recipient, title='Recipients', default=[])
     creds = ObjectProperty(TwilioCreds, title='Credentials')
@@ -58,26 +56,31 @@ class TwilioVoice(TerminatorBlock):
         self._client = None
         self._messages = {}
         self._server = None
+        self._threads = {}
 
     def configure(self, context):
         super().configure(context)
-        self._client = TwilioRestClient(self.creds().sid,
-                                        self.creds().token)
-        conf = {
-            'host': self.host(),
-            'port': self.port()
-        }
-        self.configure_server(conf, Speak(self.endpoint(), self))
+        self._client = TwilioRestClient(self.creds().sid(),
+                                        self.creds().token())
+        self.logger.debug('Configuring web server on {}:{}'.format(
+            self.host(), self.port()))
+        config = {}
+        # Incoming requests from Twilio will not have Auth header
+        Speak.before_handler = self._no_auth
+        self._server = WebEngine.add_server(self.port(), self.host(), config)
+        self._server.add_handler(Speak(self.endpoint(), self))
 
     def start(self):
         super().start()
-        # Start Web Server
-        self.start_server()
+        self.logger.debug('Starting web server')
+        self._server.start(None)
 
     def stop(self):
+        for rcp in self._threads:
+            self._threads[rcp].join()
+        self.logger.debug('Stopping web server')
+        self._server.stop()
         super().stop()
-        # Stop Web Server
-        self.stop_server()
 
     def process_signals(self, signals):
         for s in signals:
@@ -89,7 +92,9 @@ class TwilioVoice(TerminatorBlock):
             msg_id = uuid4().hex
             self._messages[msg_id] = msg
             for rcp in self.recipients():
-                spawn(target=self._call, recipient=rcp, message_id=msg_id)
+                self._threads[rcp] = spawn(target=self._call,
+                                           recipient=rcp,
+                                           message_id=msg_id)
         except Exception as e:
             self.logger.error(
                 "Message evaluation failed: {0}: {1}".format(
@@ -99,7 +104,7 @@ class TwilioVoice(TerminatorBlock):
     def _call(self, recipient, message_id, retry=False):
         try:
             # Twilio sends back some useless XML. Don't care.
-            to = recipient.number,
+            to = recipient.number(),
             from_ = self.from_(),
             url = "%s?msg_id=%s" % (self.url(), message_id)
             self.logger.debug("Making call to {}, from {}, with callback url"
@@ -120,3 +125,7 @@ class TwilioVoice(TerminatorBlock):
             self.logger.error("Error sending voice {}: {}".format(
                 recipient, e
             ))
+
+    def _no_auth(self, request, response):
+        """ Override before_handler so that authentication is not required """
+        return
