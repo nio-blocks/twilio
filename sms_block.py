@@ -50,8 +50,11 @@ class TwilioSMS(TerminatorBlock):
         try:
             message = self.message(signal)
 
-            for rcp in self.recipients():
-                Thread(target=self._broadcast_msg, args=(rcp, message)).start()
+            for rcp in self.recipients(signal):
+                args = (rcp.name(signal), rcp.number(signal), message)
+                Thread(
+                    target=self._broadcast_msg,
+                    args=args).start()
 
         except Exception as e:
             self.logger.error(
@@ -59,12 +62,12 @@ class TwilioSMS(TerminatorBlock):
                     type(e).__name__, str(e))
             )
 
-    def _broadcast_msg(self, recipient, message, retry=False):
-        body = "%s: %s" % (recipient.name(), message)
+    def _broadcast_msg(self, name, number, message, retry=False):
+        body = "%s: %s" % (name, message)
         try:
             # Twilio sends back some useless XML. Don't care.
             response = self._client.messages.create(
-                to=recipient.number(),
+                to=number,
                 from_=self.from_(),
                 body=body
             )
@@ -72,9 +75,9 @@ class TwilioSMS(TerminatorBlock):
             self.logger.error("Status %d" % e.status)
             if not retry:
                 self.logger.debug("Retrying failed request")
-                self._broadcast_msg(recipient, message, True)
+                self._broadcast_msg(name, number, message, True)
             else:
                 self.logger.error("Retry request failed")
         except Exception as e:
             self.logger.error("Error sending SMS to %s (%s): %s" %
-                              (recipient.name(), recipient.number(), e))
+                              (name, number, e))

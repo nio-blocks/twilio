@@ -27,17 +27,22 @@ class EventFlavorSignal(Signal):
         self.flavor = flavor
 
 
-class TestQueue(NIOBlockTestCase):
+class TestSMS(NIOBlockTestCase):
 
     def test_sms(self):
-        e = Event()
-        signals = [EventSignal(e)]
+        signals = [
+            Signal({
+                'message': 'hi',
+                'name': 'Snoopy',
+                'number': '5558675309',
+            }),
+        ]
         blk = TwilioSMS()
         config = {
             'recipients': [
-                {'name': 'Snoopy', 'number': '5558675309'}
+                {'name': '{{ $name }}', 'number': '{{ $number }}'}
             ],
-            'message': 'hi'
+            'message': '{{ $message }}'
         }
         self.configure_block(blk, config)
         blk._client.messages.create = MagicMock()
@@ -115,8 +120,14 @@ class TestQueue(NIOBlockTestCase):
         blk.process_signals(signals)
         sleep(1)
         self.assertEqual(1, blk.logger.error.call_count)
-        blk.logger.error.assert_called_once_with(
-            "Message evaluation failed: "
-            "TypeError: Can't convert 'int' object to str implicitly"
-        )
+        try:
+            blk.logger.error.assert_called_once_with(
+                "Message evaluation failed: "
+                "TypeError: Can't convert 'int' object to str implicitly"
+            )
+        except AssertionError:
+            blk.logger.error.assert_called_once_with(
+                "Message evaluation failed: "
+                "TypeError: can only concatenate str (not \"int\") to str"
+            )
         blk.stop()
